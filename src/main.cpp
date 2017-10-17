@@ -17,11 +17,12 @@ void setup() {
     Timer1.initialize();
   MFS.initialize(&Timer1);    // initialize multi-function shield library
 
+
   MFS.write("Hi");
   delay(2000);
   MFS.write(-273);
   delay(2000);
-  MFS.write(3.141, 2);  // display to 2 decimal places.
+  MFS.write(3.141, 3);  // display to 2 decimal places.
   delay(2000);
 
 }
