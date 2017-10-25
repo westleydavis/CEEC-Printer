@@ -16,12 +16,20 @@ uint8_t DriveMotor_State = DriveMotor_Stop;
 Adafruit_DCMotor *DriveMotor;
 Adafruit_DCMotor *ShakeMotor;
 Adafruit_MotorShield AFMotorShield;
-
+/*/////////////////////////
+//
+//
+// work on time and states
+//
+//
+*////////////////////////
 //moved back to blank space
 int counter=0;
 byte ended = false;
 byte LeftSensor = false;
 byte RightSensor = false;
+const int LeftSensorPin = 6;
+const int RightSensorPin = 5;
 //end moved back to blank space
 
 void Error();
@@ -43,18 +51,25 @@ void setup() {
     ShakeMotor->run(FORWARD);
     Timer1.initialize();
     MFS.initialize(&Timer1);    // initialize multi-function shield library
-
+/*
     MFS.write("Hi");
     delay(2000);
     MFS.write(-273);
     delay(2000);
     MFS.write(3.141, 3);  // display to 2 decimal places.
     delay(2000);
+    */
+    pinMode(LeftSensorPin, INPUT);
+    pinMode(RightSensorPin, INPUT);
+
 }
 
 
 
 void loop() {
+  LeftSensor = !digitalRead(LeftSensorPin);
+  RightSensor = !digitalRead(RightSensorPin);
+      // digitalWrite(3, HIGH);
 /* from the man
     // put your main code here, to run repeatedly:
     if (counter == 100)
@@ -84,11 +99,23 @@ void loop() {
 //error();
  delay(50);
 
-if (LeftSensor & RightSensor)
+if (LeftSensor && RightSensor)
 {
   Error();
-
+  // MFS.write("BOTH");
 }
+/*
+else if (LeftSensor){
+  MFS.write("LEFT");
+}
+else if (RightSensor){
+  MFS.write("RIGHT");
+}
+else if (!LeftSensor && !RightSensor){
+  MFS.write("NONE");
+}
+*/
+///
 else
 {
  switch(DriveMotor_State)
@@ -113,14 +140,17 @@ else
 }
 
 void Error() {
+/*
       DriveMotor->setSpeed(255);
 
       MFS.write("1111");
       MFS.blinkDisplay(DIGIT_ALL, ON);
       DriveMotor->run(BACKWARD);
-
+*/
+      DriveMotor->setSpeed(0);
       ShakeMotor->setSpeed(0);
-      MFS.write("err");
+      Stop();
+      MFS.write("ERR");
       MFS.blinkDisplay(DIGIT_ALL, ON);
 }
 
