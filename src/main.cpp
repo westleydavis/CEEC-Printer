@@ -22,7 +22,7 @@ Adafruit_MotorShield AFMotorShield;
 // work on time and states
 //
 //
-*////////////////////////
+*/////////////////////////
 //moved back to blank space
 int counter=0;
 byte ended = false;
