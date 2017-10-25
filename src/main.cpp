@@ -101,10 +101,10 @@ void loop() {
 
 if (LeftSensor && RightSensor)
 {
-  Error();
-  // MFS.write("BOTH");
+  //Error();
+  MFS.write("BOTH");
 }
-/*
+
 else if (LeftSensor){
   MFS.write("LEFT");
 }
@@ -114,7 +114,7 @@ else if (RightSensor){
 else if (!LeftSensor && !RightSensor){
   MFS.write("NONE");
 }
-*/
+
 ///
 else
 {
