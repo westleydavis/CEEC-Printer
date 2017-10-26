@@ -1,16 +1,6 @@
-#include <Arduino.h>
-#include <Wire.h>
-#include <Adafruit_MotorShield.h>
-#include <MultiFuncShield.h>
-#include <TimerOne.h>
+//#include "StandardCplusplus.h"
 
-#define DriveMotor_Stop 0
-#define DriveMotor_MovingLeft 1
-#define DriveMotor_MovingRight 2
-#define DriveMotor_PausedLeft 3
-#define DriveMotor_PausedRight 4
-#define DriveMotor_Error 5
-
+#include "main.hpp"
 uint8_t DriveMotor_State = DriveMotor_Stop;
 
 Adafruit_DCMotor *DriveMotor;
@@ -24,13 +14,22 @@ Adafruit_MotorShield AFMotorShield;
 //
 */////////////////////////
 //moved back to blank space
-byte a = 0;
+//using namespace std;
+//using namespace std;
+
+const char* a = "0";
+const char* b = "1";
 int counter=0;
 byte ended = false;
 bool LeftSensor = false;
 bool RightSensor = false;
 const int LeftSensorPin = 6;
 const int RightSensorPin = 5;
+int DriveMotorSpeed = 0;
+int shakemotorspeed = 0;
+bool ShakeMotorRunning = false;
+int long timeout = 1000; //ms
+unsigned long stoptime = 0;
 //end moved back to blank space
 
 void Error();
@@ -68,9 +67,11 @@ void setup() {
 
 
 void loop() {
-    a = MFS.getButton();
+    byte btn = MFS.getButton();
   LeftSensor = !digitalRead(LeftSensorPin);
   RightSensor = !digitalRead(RightSensorPin);
+
+
       // digitalWrite(3, HIGH);
 /* from the man
     // put your main code here, to run repeatedly:
@@ -97,13 +98,46 @@ void loop() {
    // DriveMotor->run(RELEASE);
    error();
  }
-*/
+
 //error();
  delay(50);
 
+}
+*/
+
+if (millis() < stoptime){
+    MFS.write(ShakeMotorRunning);
+}
+
 if (!LeftSensor && !RightSensor)
 {
-    MFS.write(a);
+
+    if(btn==BUTTON_1_PRESSED){
+        if (DriveMotorSpeed > 1){
+            DriveMotorSpeed--;
+        }
+        else{
+            MFS.write("MIN");
+        }
+    }
+
+    if(btn==BUTTON_2_PRESSED){
+        if (DriveMotorSpeed < 10){
+            DriveMotorSpeed++;
+        }
+        else if(DriveMotorSpeed == 10){
+            DriveMotor_State = DriveMotor_Stop;
+        }
+        else{
+            DriveMotor_State = DriveMotor_Error;
+        }
+    }
+
+    if(btn==BUTTON_3_PRESSED){
+        ShakeMotorRunning = ShakeMotorRunning != true;
+        stoptime = millis() + timeout;
+    }
+
   //Error();
   // MFS.write("BOTH");
 }
