@@ -24,10 +24,11 @@ Adafruit_MotorShield AFMotorShield;
 //
 */////////////////////////
 //moved back to blank space
+byte a = 0;
 int counter=0;
 byte ended = false;
-byte LeftSensor = false;
-byte RightSensor = false;
+bool LeftSensor = false;
+bool RightSensor = false;
 const int LeftSensorPin = 6;
 const int RightSensorPin = 5;
 //end moved back to blank space
@@ -67,6 +68,7 @@ void setup() {
 
 
 void loop() {
+    a = MFS.getButton();
   LeftSensor = !digitalRead(LeftSensorPin);
   RightSensor = !digitalRead(RightSensorPin);
       // digitalWrite(3, HIGH);
@@ -99,9 +101,10 @@ void loop() {
 //error();
  delay(50);
 
-if (LeftSensor && RightSensor)
+if (!LeftSensor && !RightSensor)
 {
-  Error();
+    MFS.write(a);
+  //Error();
   // MFS.write("BOTH");
 }
 /*
