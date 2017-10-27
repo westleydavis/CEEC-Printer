@@ -65,12 +65,12 @@ void Sensor_Test();
 void setup() {
     //AFMotorShield = Adafruit_MotorShield();
 
-    DriveMotor = AFMotorShield.getMotor(1);
-    ShakeMotor = AFMotorShield.getMotor(2);
+    DriveMotor = AFMotorShield.getMotor(3);
+    ShakeMotor = AFMotorShield.getMotor(4);
     AFMotorShield.begin();
     DriveMotor->setSpeed(150);
     //DriveMotor->run(FORWARD);
-    ShakeMotor->setSpeed(255);
+    ShakeMotor->setSpeed(75);
     //ShakeMotor->run(FORWARD);
     Timer1.initialize();
     MFS.initialize(&Timer1);    // initialize multi-function shield library
