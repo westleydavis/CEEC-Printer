@@ -68,7 +68,7 @@ void setup() {
     DriveMotor = AFMotorShield.getMotor(3);
     ShakeMotor = AFMotorShield.getMotor(4);
     AFMotorShield.begin();
-    DriveMotor->setSpeed(150);
+    DriveMotor->setSpeed(255); //(150)
     //DriveMotor->run(FORWARD);
     ShakeMotor->setSpeed(75);
     //ShakeMotor->run(FORWARD);
@@ -267,7 +267,7 @@ else{
     break;
   case DriveMotor_MovingLeft:
         DriveMotor->run(BACKWARD);
-        GoTime = millis() + DriveMotorCycleTime*500;
+        GoTime = millis() + DriveMotorCycleTime*250;
         if (LeftSensor){
             DriveMotor_State = DriveMotor_PausedLeft;
             MFS.write("00");
@@ -276,7 +276,7 @@ else{
         break;
   case DriveMotor_MovingRight:
         DriveMotor->run(FORWARD);
-    GoTime = millis() + DriveMotorCycleTime*500;
+    GoTime = millis() + DriveMotorCycleTime*250;
     if (RightSensor){
         DriveMotor_State = DriveMotor_PausedRight;
         MFS.write("00",1);
@@ -287,7 +287,7 @@ else{
     DriveMotor->run(RELEASE);
   if (millis() > GoTime){
       DriveMotor_State = DriveMotor_MovingRight;
-      DriveMotor->setSpeed(150);
+      DriveMotor->setSpeed(255);
       DriveMotor->run(FORWARD);
       MFS.write("00");
       delay(50);
@@ -297,7 +297,7 @@ else{
   DriveMotor->run(RELEASE);
       if (millis() > GoTime){
           DriveMotor_State = DriveMotor_MovingLeft;
-          DriveMotor->setSpeed(150);
+          DriveMotor->setSpeed(255);
           DriveMotor->run(BACKWARD);
           MFS.write("00",1);
           delay(50);
