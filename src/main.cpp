@@ -19,7 +19,8 @@ enum display_type {
     Display_ShakeMotor_Off,
     Display_Stop,
     Display_Error,
-    Display_Sensor_Test
+    Display_Sensor_Test,
+    Display_Pot_Test
 };
 display_type Display_State;// = Display_Stop;
 
@@ -44,8 +45,10 @@ bool LeftSensor = false;
 bool RightSensor = false;
 const int LeftSensorPin = 6;
 const int RightSensorPin = 5;
+const int PotPin = A0;
+int PotVal = 0;
 int DriveMotorCycleTime = 10;
-int shakemotorspeed = 5;
+int ShakeMotorSpeed = 0;
 bool ShakeMotorRunning = false;
 int long timeout = 500; //ms
 unsigned long DisplayTime = 0;
@@ -61,6 +64,7 @@ void PausedLeft(bool LeftSensor,bool RightSensor);
 void PausedRight(bool LeftSensor, bool RightSensor);
 void Stop();
 void Sensor_Test();
+void Pot_Test();
 
 void setup() {
     //AFMotorShield = Adafruit_MotorShield();
@@ -92,8 +96,8 @@ void setup() {
     if((btn==BUTTON_1_PRESSED) | (btn==BUTTON_2_PRESSED) | (btn==BUTTON_3_PRESSED)){
         Display_State = Display_Sensor_Test;
     }
-    if(btn==BUTTON_1_LONG_PRESSED){
-        //Display_State = Display_Sensor_Test;
+    if(btn==BUTTON_1_PRESSED){
+        Display_State = Display_Pot_Test;
     }
     //*/
 
@@ -116,6 +120,9 @@ void loop() {
   //*
 if (Display_State == Display_Sensor_Test){
     Sensor_Test();
+}
+else if (Display_State == Display_Pot_Test){
+    Pot_Test();
 }
 else{
 //*/
@@ -174,6 +181,8 @@ if (millis() < DisplayTime){
      break;
      case Display_Sensor_Test:
      break;
+     case Display_Pot_Test:
+     break;
  }
 }
 else if (Time_Transition){
@@ -199,6 +208,8 @@ else{
             MFS.write("ERR");
             break;
             case Display_Sensor_Test:
+            break;
+            case Display_Pot_Test:
             break;
         }
     }
@@ -388,4 +399,19 @@ void Sensor_Test(){
         MFS.write("NONE");
     }
 
+}
+
+void Pot_Test(){
+        PotVal = analogRead(PotPin);
+        ShakeMotorSpeed = (((PotVal - 470) * 5 - 140) / 12) + 1;
+
+        if (ShakeMotorSpeed > 10){
+          ShakeMotorSpeed = 10;
+        }
+        if (ShakeMotorSpeed < 1){
+          ShakeMotorSpeed = 1;
+        }
+        //ShakeMotorSpeed = (ShakeMotorSpeed - 145) / 12 + 1;
+
+        MFS.write(ShakeMotorSpeed);
 }
