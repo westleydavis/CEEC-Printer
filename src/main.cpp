@@ -17,9 +17,9 @@ void setup() {
     if((btn==BUTTON_1_PRESSED) | (btn==BUTTON_2_PRESSED) | (btn==BUTTON_3_PRESSED)){
         Display_State = Display_Sensor_Test;
     }
-    if(btn==BUTTON_1_PRESSED){
+    /*if(btn==BUTTON_1_PRESSED){
         Display_State = Display_Pot_Test;
-    }
+    }*/
 }
 void loop() {
     shakemotor();
@@ -81,11 +81,10 @@ void loop() {
         MFS.write(DispVal);
         break;
         case Display_Stop:
-        MFS.write("STOP");
-        //MFS.write("1"+67);
+        Stop();
         break;
         case Display_Error:
-        MFS.write("ERR");
+        MFS.write("SENS");
         break;
         case Display_Sensor_Test:
         break;
@@ -109,7 +108,10 @@ void loop() {
       if (DriveMotorSpeed < 10){
         DriveMotorSpeed++;
         Display_State = Display_MotorSpeed;
-        DriveMotor_State = DriveMotor_Engaged;
+        if (DriveMotor_State == DriveMotor_Stop){
+            DriveMotor_State = DriveMotor_Engaged;
+        }
+
       }
       else if(DriveMotorSpeed == 10){
         Display_State = Display_Max;
@@ -137,6 +139,11 @@ void loop() {
       DriveMotor->setSpeed(DriveMotorSpeed*10+155);
       DriveMotor->run(BACKWARD);
       GoTime = millis() + (11-DriveMotorSpeed)*250;
+      if (millis() > CurrentTravelTime + MaxTravelTime){
+        Display_State = Display_Error;
+        DriveMotor_State = DriveMotor_Error;
+        break;
+      }
       if (LeftSensor){
         DriveMotor_State = DriveMotor_PausedLeft;
         MFS.write("00");
@@ -147,6 +154,11 @@ void loop() {
       DriveMotor->setSpeed(DriveMotorSpeed*10+155);
       DriveMotor->run(FORWARD);
       GoTime = millis() + (11-DriveMotorSpeed)*250;
+      if (millis() > CurrentTravelTime + MaxTravelTime){
+        Display_State = Display_Error;
+        DriveMotor_State = DriveMotor_Error;
+        break;
+      }
       if (RightSensor){
         DriveMotor_State = DriveMotor_PausedRight;
         MFS.write("00",1);
@@ -160,6 +172,7 @@ void loop() {
         DriveMotor->setSpeed(255);
         DriveMotor->run(FORWARD);
         MFS.write("00");
+        CurrentTravelTime = millis();
         delay(50);
       }
       break;
@@ -170,6 +183,7 @@ void loop() {
         DriveMotor->setSpeed(255);
         DriveMotor->run(BACKWARD);
         MFS.write("00",1);
+        CurrentTravelTime = millis();
         delay(50);
       }
       break;
@@ -198,11 +212,16 @@ void Error() {
 void MovingLeft(bool LeftSensor, bool RightSensor){
 }
 void Stop(){
+  if (Display_State != Display_Error){
+      MFS.write("STOP");
+  }
+
   Display_State = Display_Stop;
   DriveMotor_State = DriveMotor_Stop;
   ShakeMotorRunning = false;
   DriveMotor->run(RELEASE);
   ShakeMotor->run(RELEASE);
+  CurrentTravelTime = millis();
 }
 void MovingRight(bool LeftSensor, bool RightSensor){
 }
