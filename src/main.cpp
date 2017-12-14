@@ -1,94 +1,16 @@
-//#include "StandardCplusplus.h"
-
 #include "main.hpp"
-// uint8_t DriveMotor_State = DriveMotor_Stop;
-enum motor_type {
-    DriveMotor_Stop,
-    DriveMotor_MovingLeft,
-    DriveMotor_MovingRight,
-    DriveMotor_PausedLeft,
-    DriveMotor_PausedRight,
-    DriveMotor_Error,
-    DriveMotor_Engaged
-};
-motor_type DriveMotor_State = DriveMotor_Stop;
-enum display_type {
-    Display_MotorSpeed,
-    Display_Min,
-    Display_ShakeMotor_On,
-    Display_ShakeMotor_Off,
-    Display_Stop,
-    Display_Error,
-    Display_Sensor_Test,
-    Display_Pot_Test
-};
-display_type Display_State;// = Display_Stop;
-
-Adafruit_DCMotor *DriveMotor;
-Adafruit_DCMotor *ShakeMotor;
-Adafruit_MotorShield AFMotorShield;
-/*/////////////////////////
-//
-//
-// work on time and states
-//
-//
-*/////////////////////////
-//moved back to blank space
-//using namespace std;
-//using namespace std;
-
-
-int counter=0;
-byte ended = false;
-bool LeftSensor = false;
-bool RightSensor = false;
-const int LeftSensorPin = 6;
-const int RightSensorPin = 5;
-const int PotPin = A0;
-int PotVal = 0;
-int DriveMotorCycleTime = 10;
-int ShakeMotorSpeed = 0;
-bool ShakeMotorRunning = false;
-int long timeout = 500; //ms
-unsigned long DisplayTime = 0;
-unsigned long GoTime = 0;
-bool Time_Transition = false;
-
-//end moved back to blank space
-
-void Error();
-void MovingLeft(bool LeftSensor, bool RightSensor);
-void MovingRight(bool LeftSensor, bool RightSensor);
-void PausedLeft(bool LeftSensor,bool RightSensor);
-void PausedRight(bool LeftSensor, bool RightSensor);
-void Stop();
-void Sensor_Test();
-void Pot_Test();
 
 void setup() {
-    //AFMotorShield = Adafruit_MotorShield();
-
     DriveMotor = AFMotorShield.getMotor(3);
     ShakeMotor = AFMotorShield.getMotor(4);
     AFMotorShield.begin();
-    DriveMotor->setSpeed(255); //(150)
-    //DriveMotor->run(FORWARD);
+    DriveMotor->setSpeed(255);
     ShakeMotor->setSpeed(75);
-    //ShakeMotor->run(FORWARD);
     Timer1.initialize();
     MFS.initialize(&Timer1);    // initialize multi-function shield library
-/*
-    MFS.write("Hi");
-    delay(2000);
-    MFS.write(-273);
-    delay(2000);
-    MFS.write(3.141, 3);  // display to 2 decimal places.
-    delay(2000);
-    */
     pinMode(LeftSensorPin, INPUT);
     pinMode(RightSensorPin, INPUT);
-    //*
+
     delay(500);
     byte btn = MFS.getButton();
     delay(500);
@@ -411,7 +333,5 @@ void Pot_Test(){
         if (ShakeMotorSpeed < 1){
           ShakeMotorSpeed = 1;
         }
-        //ShakeMotorSpeed = (ShakeMotorSpeed - 145) / 12 + 1;
-
         MFS.write(ShakeMotorSpeed);
 }
