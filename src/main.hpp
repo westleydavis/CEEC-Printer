@@ -16,7 +16,7 @@ enum motor_type {
 motor_type DriveMotor_State = DriveMotor_Stop;
 enum display_type {
     Display_MotorSpeed,
-    Display_Min,
+    Display_Max,
     Display_ShakeMotor_On,
     Display_ShakeMotor_Off,
     Display_Stop,
@@ -38,8 +38,11 @@ const int LeftSensorPin = 6;
 const int RightSensorPin = 5;
 const int PotPin = A0;
 int PotVal = 0;
-int DriveMotorCycleTime = 10;
+// int DriveMotorCycleTime = 10;
+int DriveMotorSpeed = 0;
+int DriveMotorSpeed_Prev = 0;
 int ShakeMotorSpeed = 0;
+int ShakeMotorSpeed_Prev = 0;
 bool ShakeMotorRunning = false;
 int long timeout = 500; //ms
 unsigned long DisplayTime = 0;
