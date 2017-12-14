@@ -1,37 +1,5 @@
 #include "main.hpp"
 
-
-display_type Display_State;
-Adafruit_DCMotor *DriveMotor;
-Adafruit_DCMotor *ShakeMotor;
-Adafruit_MotorShield AFMotorShield;
-
-
-int counter=0;
-byte ended = false;
-bool LeftSensor = false;
-bool RightSensor = false;
-const int LeftSensorPin = 6;
-const int RightSensorPin = 5;
-int DriveMotorCycleTime = 10;
-int shakemotorspeed = 5;
-bool ShakeMotorRunning = false;
-int long timeout = 500; //ms
-unsigned long DisplayTime = 0;
-unsigned long GoTime = 0;
-bool Time_Transition = false;
-
-
-
-void Error();
-void MovingLeft(bool LeftSensor, bool RightSensor);
-void MovingRight(bool LeftSensor, bool RightSensor);
-void PausedLeft(bool LeftSensor,bool RightSensor);
-void PausedRight(bool LeftSensor, bool RightSensor);
-void shakemotor();
-void Stop();
-void Sensor_Test();
-
 void setup() {
     DriveMotor = AFMotorShield.getMotor(3);
     ShakeMotor = AFMotorShield.getMotor(4);
@@ -49,177 +17,178 @@ void setup() {
     if((btn==BUTTON_1_PRESSED) | (btn==BUTTON_2_PRESSED) | (btn==BUTTON_3_PRESSED)){
         Display_State = Display_Sensor_Test;
     }
+    if(btn==BUTTON_1_PRESSED){
+        Display_State = Display_Pot_Test;
+    }
 }
 void loop() {
-  //get sensors
-  byte btn = MFS.getButton();
-  LeftSensor = !digitalRead(LeftSensorPin);
-  RightSensor = !digitalRead(RightSensorPin);
+    shakemotor();
+    Pot_Test();
+    byte btn = MFS.getButton();
+    LeftSensor = !digitalRead(LeftSensorPin);
+    RightSensor = !digitalRead(RightSensorPin);
 
-  shakemotor();
-
-  if (Display_State == Display_Sensor_Test){
-    Sensor_Test();
-    return;
-  }
-  if (LeftSensor && RightSensor){
-      MFS.write("SENS");
-      Stop();
+    if (Display_State == Display_Sensor_Test){
+      Sensor_Test();
       return;
-  }
+    }
+    if (LeftSensor && RightSensor){
+        MFS.write("SENS");
+        Stop();
+        return;
+    }
 
-      if (millis() < DisplayTime){
-          Time_Transition = true;
-          switch (Display_State){
-            case Display_Min:
-            MFS.write("LO",1);
-            break;
-            case Display_ShakeMotor_Off:
-            MFS.write("OFF",1);
-            break;
-            case Display_ShakeMotor_On:
-            MFS.write("ON",1);
-            break;
-            case Display_Stop:
-            break;
-            case Display_MotorSpeed:
-            break;
-            case Display_Error:
-            break;
-            case Display_Sensor_Test:
-            break;
-          }
-        }
-        else if (Time_Transition){
-          Time_Transition = false;
-          Display_State = Display_MotorSpeed;
-          MFS.write(DriveMotorCycleTime);
-        }
-else{
-        switch (Display_State){
-            case Display_Min:
-            break;
-            case Display_ShakeMotor_Off:
-            break;
-            case Display_ShakeMotor_On:
-            break;
-            case Display_MotorSpeed:
-            MFS.write(DriveMotorCycleTime);
-            break;
-            case Display_Stop:
-            MFS.write("STOP");
-            break;
-            case Display_Error:
-            MFS.write("ERR");
-            break;
-            case Display_Sensor_Test:
-            break;
-        }
+    if (millis() < DisplayTime){
+      Time_Transition = true;
+      switch (Display_State){
+        case Display_Max:
+        MFS.write("hi",1);
+        break;
+        case Display_ShakeMotor_Off:
+        MFS.write("OFF",1);
+        break;
+        case Display_ShakeMotor_On:
+        MFS.write("ON",1);
+        ShakeMotor->setSpeed(100);
+        break;
+        case Display_Stop:
+        break;
+        case Display_MotorSpeed:
+        break;
+        case Display_Error:
+        break;
+        case Display_Sensor_Test:
+        break;
+        case Display_Pot_Test:
+        break;
+      }
+    }
+    else if (Time_Transition){
+      Time_Transition = false;
+      Display_State = Display_MotorSpeed;
+      MFS.write(DriveMotorSpeed);
+    }
+    else{
+      switch (Display_State){
+        case Display_Max:
+        break;
+        case Display_ShakeMotor_Off:
+        break;
+        case Display_ShakeMotor_On:
+        break;
+        case Display_MotorSpeed:
+        DispVal = float(DriveMotorSpeed)+float(ShakeMotorSpeed)/100.0;
+        MFS.write(DispVal);
+        break;
+        case Display_Stop:
+        MFS.write("STOP");
+        //MFS.write("1"+67);
+        break;
+        case Display_Error:
+        MFS.write("ERR");
+        break;
+        case Display_Sensor_Test:
+        break;
+        case Display_Pot_Test:
+        break;
+      }
     }
     if(btn==BUTTON_1_PRESSED){
-        if (Display_State == Display_Stop){
-            DriveMotorCycleTime = 10;
-            Display_State = Display_MotorSpeed;
-            DriveMotor_State = DriveMotor_Engaged;
-        }
-        else if (DriveMotorCycleTime > 1){
-        DriveMotorCycleTime--;
+      if (Display_State == Display_Stop){
+      }
+      else if (DriveMotorSpeed > 0){
+        DriveMotorSpeed--;
         Display_State = Display_MotorSpeed;
-        }
-        else{
-            Display_State = Display_Min;
-            DisplayTime = millis() + timeout;
-        }
+      }
+      if (DriveMotorSpeed == 0){
+        Display_State = Display_Stop;
+        DriveMotor_State = DriveMotor_Stop;
+      }
     }
-
     if(btn==BUTTON_2_PRESSED){
-        if (DriveMotorCycleTime < 10){
-            DriveMotorCycleTime++;
-            Display_State = Display_MotorSpeed;
-        }
-        else if(DriveMotorCycleTime == 10){
-            DriveMotor_State = DriveMotor_Stop;
-            Display_State = Display_Stop;
-        }
-        else{
-            DriveMotor_State = DriveMotor_Error;
-        }
-    }
-
-    if((btn==BUTTON_3_PRESSED) && (Display_State!=Display_Stop)){
-        ShakeMotorRunning = ShakeMotorRunning != true;
+      if (DriveMotorSpeed < 10){
+        DriveMotorSpeed++;
+        Display_State = Display_MotorSpeed;
+        DriveMotor_State = DriveMotor_Engaged;
+      }
+      else if(DriveMotorSpeed == 10){
+        Display_State = Display_Max;
         DisplayTime = millis() + timeout;
-        if (ShakeMotorRunning){
-            Display_State = Display_ShakeMotor_On;
-        }
-        else{
-            Display_State = Display_ShakeMotor_Off;
-        }
+      }
+      else{
+        DriveMotor_State = DriveMotor_Error;
+      }
     }
- switch(DriveMotor_State)
- {
-  case DriveMotor_Stop:
-    Stop();
-    break;
-  case DriveMotor_MovingLeft:
-        DriveMotor->run(BACKWARD);
-        GoTime = millis() + DriveMotorCycleTime*250;
-        if (LeftSensor){
-            DriveMotor_State = DriveMotor_PausedLeft;
-            MFS.write("00");
-            delay(50);
-        }
-        break;
-  case DriveMotor_MovingRight:
-        DriveMotor->run(FORWARD);
-    GoTime = millis() + DriveMotorCycleTime*250;
-    if (RightSensor){
+    if((btn==BUTTON_3_PRESSED) && (Display_State!=Display_Stop)){
+      ShakeMotorRunning = ShakeMotorRunning != true;
+      DisplayTime = millis() + timeout;
+      if (ShakeMotorRunning){
+        Display_State = Display_ShakeMotor_On;
+      }
+      else{
+        Display_State = Display_ShakeMotor_Off;
+      }
+    }
+    switch(DriveMotor_State){
+      case DriveMotor_Stop:
+      Stop();
+      break;
+      case DriveMotor_MovingLeft:
+      DriveMotor->setSpeed(DriveMotorSpeed*10+155);
+      DriveMotor->run(BACKWARD);
+      GoTime = millis() + (11-DriveMotorSpeed)*250;
+      if (LeftSensor){
+        DriveMotor_State = DriveMotor_PausedLeft;
+        MFS.write("00");
+        delay(50);
+      }
+      break;
+      case DriveMotor_MovingRight:
+      DriveMotor->setSpeed(DriveMotorSpeed*10+155);
+      DriveMotor->run(FORWARD);
+      GoTime = millis() + (11-DriveMotorSpeed)*250;
+      if (RightSensor){
         DriveMotor_State = DriveMotor_PausedRight;
         MFS.write("00",1);
         delay(50);
-    }
-    break;
-  case DriveMotor_PausedLeft:
-    DriveMotor->run(RELEASE);
-  if (millis() > GoTime){
-      DriveMotor_State = DriveMotor_MovingRight;
-      DriveMotor->setSpeed(255);
-      DriveMotor->run(FORWARD);
-      MFS.write("00");
-      delay(50);
-    }
-    break;
-  case DriveMotor_PausedRight:
-  DriveMotor->run(RELEASE);
+      }
+      break;
+      case DriveMotor_PausedLeft:
+      DriveMotor->run(RELEASE);
       if (millis() > GoTime){
-          DriveMotor_State = DriveMotor_MovingLeft;
-          DriveMotor->setSpeed(255);
-          DriveMotor->run(BACKWARD);
-          MFS.write("00",1);
-          delay(50);
-
-        }
-        break;
-  case DriveMotor_Error:
-  Error();
-  break;
-  case DriveMotor_Engaged:
-  if (LeftSensor)
-    DriveMotor_State = DriveMotor_MovingRight;
-    else{
+        DriveMotor_State = DriveMotor_MovingRight;
+        DriveMotor->setSpeed(255);
+        DriveMotor->run(FORWARD);
+        MFS.write("00");
+        delay(50);
+      }
+      break;
+      case DriveMotor_PausedRight:
+      DriveMotor->run(RELEASE);
+      if (millis() > GoTime){
         DriveMotor_State = DriveMotor_MovingLeft;
+        DriveMotor->setSpeed(255);
+        DriveMotor->run(BACKWARD);
+        MFS.write("00",1);
+        delay(50);
+      }
+      break;
+      case DriveMotor_Error:
+      Error();
+      break;
+      case DriveMotor_Engaged:
+      if (LeftSensor)
+      DriveMotor_State = DriveMotor_MovingRight;
+      else{
+        DriveMotor_State = DriveMotor_MovingLeft;
+      }
+      break;
+      default:
+      MFS.write("prog");
+      ShakeMotor->run(RELEASE);
+      DriveMotor->run(RELEASE);
     }
-  break;
-  default:
-    MFS.write("prog");
-    ShakeMotor->run(RELEASE);
-    DriveMotor->run(RELEASE);
-  }
-
-
-
 }
-
 void Error() {
       Stop();
       DriveMotor_State = DriveMotor_Error;
@@ -235,24 +204,23 @@ void Stop(){
   DriveMotor->run(RELEASE);
   ShakeMotor->run(RELEASE);
 }
+void MovingRight(bool LeftSensor, bool RightSensor){
+}
+void PausedLeft(bool LeftSensor,bool RightSensor){
+}
+void PausedRight(bool LeftSensor, bool RightSensor){
+}
 void shakemotor(){
   if(ShakeMotorRunning){
     ShakeMotor->run(FORWARD);
+    ShakeMotor->setSpeed(ShakeMotorSpeed*15);
+
   }
   else{
     ShakeMotor->run(RELEASE);
+
   }
 }
-
-void MovingRight(bool LeftSensor, bool RightSensor){
-}
-
-void PausedLeft(bool LeftSensor,bool RightSensor){
-}
-
-void PausedRight(bool LeftSensor, bool RightSensor){
-}
-
 void Sensor_Test(){
     if (LeftSensor && RightSensor){
         MFS.write("BOTH");
@@ -266,4 +234,16 @@ void Sensor_Test(){
     else {
         MFS.write("NONE");
     }
+}
+void Pot_Test(){
+    //if (!ShakeMotorRunning){
+    PotVal = analogRead(PotPin);
+    ShakeMotorSpeed = 11-((((PotVal - 470) * 5 - 140) / 12) + 1);
+    if (ShakeMotorSpeed > 10){
+      ShakeMotorSpeed = 10;
+    }
+    if (ShakeMotorSpeed < 1){
+      ShakeMotorSpeed = 1;
+    }
+  //}
 }

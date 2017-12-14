@@ -91,7 +91,7 @@ class MultiFuncShield
     // Writes to the LED digit display.
     void write(const char *textstring, byte rightJustify =0);
     void write(int integer);
-    void write(float number, byte decimalPlaces = 1);
+    void write(float number, byte decimalPlaces = 2);
 
     // Manually refreshes the Led digit display.
     // Not to be used whilst interrupt based features are available.
