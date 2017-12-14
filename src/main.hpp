@@ -48,6 +48,8 @@ int long timeout = 500; //ms
 unsigned long DisplayTime = 0;
 unsigned long GoTime = 0;
 bool Time_Transition = false;
+float DispVal = 0;
+
 
 
 void Error();
@@ -58,3 +60,4 @@ void PausedRight(bool LeftSensor, bool RightSensor);
 void Stop();
 void Sensor_Test();
 void Pot_Test();
+void shakemotor();
